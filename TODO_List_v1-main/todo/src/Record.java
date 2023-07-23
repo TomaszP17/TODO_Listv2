@@ -5,9 +5,9 @@ public class Record {
     private int idRecord;
     private String content;
     private boolean isDone;
-    private int priority;
+    private String priority;
     private LocalDate createDate;
-    public Record(int idRecord, String content, boolean isDone, int priority, LocalDate createDate) {
+    public Record(int idRecord, String content, boolean isDone, String priority, LocalDate createDate) {
         this.idRecord = idRecord;
         this.content = content;
         this.isDone = isDone;
@@ -35,10 +35,10 @@ public class Record {
     public void setDone(boolean done) {
         isDone = done;
     }
-    public int getPriority() {
+    public String getPriority() {
         return priority;
     }
-    public void setPriority(int priority) {
+    public void setPriority(String priority) {
         this.priority = priority;
     }
 
