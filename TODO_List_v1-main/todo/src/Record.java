@@ -1,5 +1,4 @@
 import java.time.LocalDate;
-import java.util.Date;
 
 public class Record {
     private int idRecord;
@@ -7,11 +6,11 @@ public class Record {
     private boolean isDone;
     private String priority;
     private LocalDate createDate;
-    public Record(int idRecord, String content, boolean isDone, String priority, LocalDate createDate) {
+    public Record(int idRecord, String content, boolean isDone, Priority priority, LocalDate createDate) {
         this.idRecord = idRecord;
         this.content = content;
         this.isDone = isDone;
-        this.priority = priority;
+        this.priority = priority.toString();
         this.createDate = createDate;
     }
     public int getIdRecord() {

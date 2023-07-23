@@ -1,8 +1,7 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.sql.*;
 import java.time.LocalDate;
 
 public class UpperPanel extends JPanel {
@@ -17,17 +16,17 @@ public class UpperPanel extends JPanel {
         addRecordButton.addActionListener(e -> {
             JPanel inputPanel = new JPanel(new GridLayout(3, 2));
             JTextField taskField = new JTextField(20);
-            JComboBox<String> statusField = new JComboBox<>();
-            statusField.addItem("true");
-            statusField.addItem("false");
-            JComboBox<String> priorityField = new JComboBox<>();
-            priorityField.addItem("Not important");
-            priorityField.addItem("Important");
-            priorityField.addItem("Very important");
+            JComboBox<Boolean> statusField = new JComboBox<>();
+            statusField.addItem(false);
+            statusField.addItem(true);
+            JComboBox<Priority> priorityField = new JComboBox<>();
+            priorityField.addItem(Priority.NOT_IMPORTANT);
+            priorityField.addItem(Priority.IMPORTANT);
+            priorityField.addItem(Priority.VERY_IMPORTANT);
 
             inputPanel.add(new JLabel("Task:"));
             inputPanel.add(taskField);
-            inputPanel.add(new JLabel("Status (true/false):"));
+            inputPanel.add(new JLabel("Status:"));
             inputPanel.add(statusField);
             inputPanel.add(new JLabel("Priority: "));
             inputPanel.add(priorityField);
@@ -36,8 +35,7 @@ public class UpperPanel extends JPanel {
 
             if (option == JOptionPane.OK_OPTION) {
                 String task = taskField.getText();
-                String statusText = String.valueOf(statusField.getSelectedIndex());
-                boolean status = Boolean.parseBoolean(statusText);
+                boolean status = (boolean) statusField.getSelectedItem();
                 String priority = String.valueOf(priorityField.getSelectedItem());
                 LocalDate localDate = LocalDate.now();
                 Object[] rowData = {todoTableModel.getRowCount() + 1, task, status, priority, localDate};
@@ -71,15 +69,15 @@ public class UpperPanel extends JPanel {
 
                 JPanel editingPanel = new JPanel(new GridLayout(3, 2));
                 JTextField taskField = new JTextField(20);
-                JComboBox<String> isDone = new JComboBox<>();
-                JComboBox<String> priorityBox = new JComboBox<>();
+                JComboBox<Status> isDone = new JComboBox<>();
+                JComboBox<Priority> priorityBox = new JComboBox<>();
 
-                isDone.addItem("false");
-                isDone.addItem("true");
+                isDone.addItem(Status.FALSE);
+                isDone.addItem(Status.TRUE);
 
-                priorityBox.addItem("Not important");
-                priorityBox.addItem("Important");
-                priorityBox.addItem("Very important");
+                priorityBox.addItem(Priority.NOT_IMPORTANT);
+                priorityBox.addItem(Priority.IMPORTANT);
+                priorityBox.addItem(Priority.VERY_IMPORTANT);
 
                 editingPanel.add(new JLabel("Task: "));
                 editingPanel.add(taskField);
@@ -96,7 +94,6 @@ public class UpperPanel extends JPanel {
                     boolean editedIsDoneStatus = Boolean.parseBoolean(editedIsDoneValue);
                     String editedPriority = priorityBox.getSelectedItem().toString();
 
-                    // Aktualizacja wartości dla wybranego wiersza w tabeli
                     todoTableModel.setValueAt(editedTask, selectedItem, 1);
                     todoTableModel.setValueAt(editedIsDoneStatus, selectedItem, 2);
                     todoTableModel.setValueAt(editedPriority, selectedItem, 3);
@@ -107,11 +104,33 @@ public class UpperPanel extends JPanel {
 
         JButton loadDataButton = new JButton("Load data");
         loadDataButton.addActionListener(e -> {
+            String url = "jdbc:oracle:thin:@localhost:1521:XE";
+            String username = "system";
+            String password = "root";
 
+            try {
+                Connection connection = DriverManager.getConnection(url, username, password);
+
+                String sqlQuery = "SELECT * FROM PEOPLE";
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery(sqlQuery);
+
+                while (resultSet.next()) {
+                    int id = resultSet.getInt("ID");
+                    String name = resultSet.getString("NAME");
+                    int age = resultSet.getInt("AGE");
+                    System.out.println("ID: " + id + ", Name: " + name + ", Age: " + age);
+                }
+
+                resultSet.close();
+                statement.close();
+                connection.close();
+            } catch (SQLException event) {
+                event.printStackTrace();
+            }
         });
         add(loadDataButton);
 
-        //updating table in DB
         JButton updateDataButton = new JButton("Update data");
         updateDataButton.addActionListener(e -> {
 

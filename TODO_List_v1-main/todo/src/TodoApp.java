@@ -13,25 +13,23 @@ public class TodoApp extends JFrame {
 
         LocalDate localDate = LocalDate.now();
         Record[] todoItems = {
-                new Record(1, "skonczyc ten program", true, "Not important", localDate),
-                new Record(2, "kupic litr wodki", true, "Important", localDate),
-                new Record(3, "po robocie pojsc na impreze", true, "Very important", localDate)
+                new Record(1, "skonczyc ten program", true,Priority.NOT_IMPORTANT, localDate),
+                new Record(2, "kupic litr wodki", true, Priority.IMPORTANT, localDate),
+                new Record(3, "po robocie pojsc na impreze", true, Priority.VERY_IMPORTANT, localDate)
         };
-        // Tworzymy i ustawiamy model listy
-        DefaultTableModel todoTableModel = new DefaultTableModel();
-        todoTableModel.addColumn("ID");
-        todoTableModel.addColumn("TASK");
-        todoTableModel.addColumn("IS DONE");
-        todoTableModel.addColumn("PRIORITY");
-        todoTableModel.addColumn("DATA");
 
-        //DODAWANIE DO JTABLEMODEL
+        DefaultTableModel todoTableModel = new DefaultTableModel();
+        todoTableModel.addColumn(Category.ID);
+        todoTableModel.addColumn(Category.TASK);
+        todoTableModel.addColumn(Category.IS_DONE);
+        todoTableModel.addColumn(Category.PRIORITY);
+        todoTableModel.addColumn(Category.DATA);
+
         for (Record item : todoItems) {
             Object[] rowData = {item.getIdRecord(), item.getContent(), item.isDone(), item.getPriority(), item.getCreateDate()};
             todoTableModel.addRow(rowData);
         }
 
-        // Tworzymy JTable na podstawie modelu
         JTable todoTable = new JTable(todoTableModel);
         todoTable.setBackground(Color.lightGray);
         todoTable.getColumnModel().getColumn(0).setPreferredWidth(20);
@@ -40,13 +38,13 @@ public class TodoApp extends JFrame {
         todoTable.getColumnModel().getColumn(3).setPreferredWidth(20);
         todoTable.getColumnModel().getColumn(4).setPreferredWidth(20);
 
-        //pozwala na sortowanie poprzez klikanie nazw kolumn
+        todoTable.setDefaultRenderer(Object.class, new StatusRowRenderer(2));
+
         todoTable.setAutoCreateRowSorter(true);
 
         JScrollPane scrollPane = new JScrollPane(todoTable);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Przekazujemy referencję do modelu listy do klasy UpperPanel
         UpperPanel upperPanel = new UpperPanel(todoTableModel);
         upperPanel.setTodoTable(todoTable);
         add(upperPanel, BorderLayout.NORTH);
