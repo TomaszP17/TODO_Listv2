@@ -12,11 +12,6 @@ public class TodoApp extends JFrame {
         setIconImage(imageIcon.getImage());
 
         LocalDate localDate = LocalDate.now();
-        Record[] todoItems = {
-                new Record(1, "skonczyc ten program", true,Priority.NOT_IMPORTANT, localDate),
-                new Record(2, "kupic litr wodki", true, Priority.IMPORTANT, localDate),
-                new Record(3, "po robocie pojsc na impreze", true, Priority.VERY_IMPORTANT, localDate)
-        };
 
         DefaultTableModel todoTableModel = new DefaultTableModel();
         todoTableModel.addColumn(Category.ID);
@@ -24,11 +19,6 @@ public class TodoApp extends JFrame {
         todoTableModel.addColumn(Category.IS_DONE);
         todoTableModel.addColumn(Category.PRIORITY);
         todoTableModel.addColumn(Category.DATA);
-
-        for (Record item : todoItems) {
-            Object[] rowData = {item.getIdRecord(), item.getContent(), item.isDone(), item.getPriority(), item.getCreateDate()};
-            todoTableModel.addRow(rowData);
-        }
 
         JTable todoTable = new JTable(todoTableModel);
         todoTable.setBackground(Color.lightGray);
@@ -50,7 +40,7 @@ public class TodoApp extends JFrame {
         add(upperPanel, BorderLayout.NORTH);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(1920, 1080));
+        setPreferredSize(new Dimension(600, 600));
         pack();
         setVisible(true);
     }

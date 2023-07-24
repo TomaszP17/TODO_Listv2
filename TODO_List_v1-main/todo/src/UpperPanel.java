@@ -6,6 +6,9 @@ import java.time.LocalDate;
 
 public class UpperPanel extends JPanel {
     private JTable todoTable;
+    private String url = "jdbc:oracle:thin:@localhost:1521:XE";
+    private String username = "system";
+    private String password = "root";
     public UpperPanel(DefaultTableModel todoTableModel) {
 
         JLabel countRecordLabel = new JLabel("TODO elements: " + todoTableModel.getRowCount());
@@ -104,22 +107,34 @@ public class UpperPanel extends JPanel {
 
         JButton loadDataButton = new JButton("Load data");
         loadDataButton.addActionListener(e -> {
-            String url = "jdbc:oracle:thin:@localhost:1521:XE";
-            String username = "system";
-            String password = "root";
+            //clear actual todoTabel
+            todoTableModel.setRowCount(0);
 
             try {
                 Connection connection = DriverManager.getConnection(url, username, password);
 
-                String sqlQuery = "SELECT * FROM PEOPLE";
+                String sqlQuery = "SELECT * FROM TASK";
                 Statement statement = connection.createStatement();
                 ResultSet resultSet = statement.executeQuery(sqlQuery);
 
                 while (resultSet.next()) {
                     int id = resultSet.getInt("ID");
-                    String name = resultSet.getString("NAME");
-                    int age = resultSet.getInt("AGE");
-                    System.out.println("ID: " + id + ", Name: " + name + ", Age: " + age);
+                    String task = resultSet.getString("TASK");
+                    boolean isDone = resultSet.getBoolean("ISDONE");
+                    Priority priority = null;
+                    String dbPriority = resultSet.getString("PRIORITY");
+                    switch (dbPriority){
+                        case "Not important" -> priority = Priority.NOT_IMPORTANT;
+                        case "Important" -> priority = Priority.IMPORTANT;
+                        case "Very important" -> priority = Priority.VERY_IMPORTANT;
+                    }
+                    LocalDate data = resultSet.getDate("DATA").toLocalDate();
+
+                    System.out.println(id + " " + task + " " + isDone + " " + priority + " " + data);
+
+                    Object[] rowData = {id, task, isDone, priority, data};
+                    todoTableModel.addRow(rowData);
+
                 }
 
                 resultSet.close();
@@ -132,8 +147,42 @@ public class UpperPanel extends JPanel {
         add(loadDataButton);
 
         JButton updateDataButton = new JButton("Update data");
-        updateDataButton.addActionListener(e -> {
 
+        updateDataButton.addActionListener(e -> {
+            try {
+
+                Connection connection = DriverManager.getConnection(url, username, password);
+
+                String deleteQuery = "DELETE FROM TASK";
+                Statement deleteStatement = connection.createStatement();
+                deleteStatement.executeUpdate(deleteQuery);
+                deleteStatement.close();
+
+                String insertQuery = "INSERT INTO TASK (ID, TASK, ISDONE, PRIORITY, DATA) VALUES (?, ?, ?, ?, ?)";
+                PreparedStatement insertStatement = connection.prepareStatement(insertQuery);
+
+                for (int i = 0; i < todoTableModel.getRowCount(); i++) {
+                    int id = (int) todoTableModel.getValueAt(i, 0);
+                    String task = (String) todoTableModel.getValueAt(i, 1);
+                    boolean isDone = (boolean) todoTableModel.getValueAt(i, 2);
+                    String priority = todoTableModel.getValueAt(i, 3).toString();
+                    LocalDate data = (LocalDate) todoTableModel.getValueAt(i, 4);
+
+                    // Mapujemy wartości do parametrów w zapytaniu SQL
+                    insertStatement.setInt(1, id);
+                    insertStatement.setString(2, task);
+                    insertStatement.setBoolean(3, isDone);
+                    insertStatement.setString(4, priority);
+                    insertStatement.setDate(5, java.sql.Date.valueOf(data));
+
+                    // Wykonaj zapytanie INSERT dla aktualnego wiersza
+                    insertStatement.executeUpdate();
+                }
+                insertStatement.close();
+                connection.close();
+            } catch (SQLException event) {
+                event.printStackTrace();
+            }
         });
         add(updateDataButton);
     }
